@@ -7,6 +7,6 @@ tree = ET.parse(xmlfile)
 # get root element
 root = tree.getroot()
 
-root.getchildren()[0].attrib['isExecutable'] = "true"
+root[0].attrib['isExecutable'] = "true"
 tree.write(xmlfile)
 a=3
