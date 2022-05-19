@@ -1,33 +1,26 @@
-import xml.etree.ElementTree as ET
+import pathlib
+import xml.dom.minidom
 
-xmlfile = "data/basic_with_gateway_SIG.bpmn"
-# create element tree object
-tree = ET.parse(xmlfile)
+def traverse_and_fix(node):
 
-# get root element
-root = tree.getroot()
-root[0].attrib['isExecutable'] = "true"
-
-n_elements = len(root[0])
-
-tree.write(xmlfile)
-
-
-def traverse(node, parent_of_node):
-
-    children = node.getchildren()
+    children = node.childNodes
     if len(children) == 0:
-        if "signavio" in node.tag:
-            print(node)
-            parent_of_node.remove(node)
+        if node.localName is not None and "signavio" in node.localName:
+            node.parentNode.removeChild(node)
     else:
         for child in children:
-            traverse(node=child, parent_of_node=node)
+            traverse_and_fix(node=child)
 
-a=3
+in_xml = "data/basic_with_gateway.bpmn"
+suffix = pathlib.Path(in_xml).suffix
+out_xml = f"{in_xml[:len(in_xml)-len(suffix)]}_C8{suffix}"
 
-traverse(node=root, parent_of_node=None)
+domtree = xml.dom.minidom.parse(in_xml)
+root = domtree.documentElement
 
-a=3
 
-tree.write("data/removed_signavio.bpmn")
+root.childNodes[1].attributes['isExecutable'].nodeValue = "true"
+
+traverse_and_fix(node=root)
+
+domtree.writexml(open(out_xml, "w"), encoding="UTF-8")
