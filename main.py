@@ -3,6 +3,13 @@ import xml.dom.minidom
 
 def traverse_and_fix(node):
 
+    try:
+        isExec = node.attributes['isExecutable']
+        if isExec != "true":
+            node.attributes['isExecutable'] = "true"
+    except (TypeError, KeyError):
+        pass
+
     children = node.childNodes
     if len(children) == 0:
         if node.localName is not None and "signavio" in node.localName:
@@ -11,15 +18,13 @@ def traverse_and_fix(node):
         for child in children:
             traverse_and_fix(node=child)
 
-in_xml = "data/basic_with_gateway.bpmn"
+in_xml = "data/sprint3-process.bpmn"
 suffix = pathlib.Path(in_xml).suffix
 out_xml = f"{in_xml[:len(in_xml)-len(suffix)]}_C8{suffix}"
 
 domtree = xml.dom.minidom.parse(in_xml)
 root = domtree.documentElement
 
-
-root.childNodes[1].attributes['isExecutable'].nodeValue = "true"
 
 traverse_and_fix(node=root)
 
